@@ -8,3 +8,4 @@ C:\Users\ethan_huang\source\repos\DIOControl\DIOControl\obj\Debug\DIOControl.dll
 C:\Users\ethan_huang\source\repos\DIOControl\DIOControl\obj\Debug\DIOControl.pdb
 C:\Users\ethan_huang\source\repos\DIOControl\DIOControl\bin\Debug\Newtonsoft.Json.dll
 C:\Users\ethan_huang\source\repos\DIOControl\DIOControl\bin\Debug\Newtonsoft.Json.xml
+C:\Users\ethan_huang\source\repos\DIOControl\DIOControl\obj\Debug\DIOControl.csprojAssemblyReference.cache
