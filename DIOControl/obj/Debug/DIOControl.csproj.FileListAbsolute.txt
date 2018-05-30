@@ -9,3 +9,12 @@ C:\Users\ethan_huang\source\repos\DIOControl\DIOControl\obj\Debug\DIOControl.pdb
 C:\Users\ethan_huang\source\repos\DIOControl\DIOControl\bin\Debug\Newtonsoft.Json.dll
 C:\Users\ethan_huang\source\repos\DIOControl\DIOControl\bin\Debug\Newtonsoft.Json.xml
 C:\Users\ethan_huang\source\repos\DIOControl\DIOControl\obj\Debug\DIOControl.csprojAssemblyReference.cache
+D:\SyncSourceCode\DIOControl\DIOControl\bin\Debug\DIOControl.dll
+D:\SyncSourceCode\DIOControl\DIOControl\bin\Debug\DIOControl.pdb
+D:\SyncSourceCode\DIOControl\DIOControl\bin\Debug\Newtonsoft.Json.dll
+D:\SyncSourceCode\DIOControl\DIOControl\bin\Debug\Newtonsoft.Json.xml
+D:\SyncSourceCode\DIOControl\DIOControl\obj\Debug\DIOControl.csproj.CoreCompileInputs.cache
+D:\SyncSourceCode\DIOControl\DIOControl\obj\Debug\DIOControl.csproj.CopyComplete
+D:\SyncSourceCode\DIOControl\DIOControl\obj\Debug\DIOControl.dll
+D:\SyncSourceCode\DIOControl\DIOControl\obj\Debug\DIOControl.pdb
+D:\SyncSourceCode\DIOControl\DIOControl\obj\Debug\DIOControl.csprojAssemblyReference.cache
