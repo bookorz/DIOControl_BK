@@ -11,5 +11,7 @@ namespace DIOControl.Controller
         void SetOut(string Address,string Value);
         string GetIn(string Address);
         string GetOut(string Address);
+        void Connect();
+        void Close();
     }
 }

@@ -16,6 +16,7 @@ namespace DIOControl.Controller
 
         IDIOReport _Report;
         CtrlConfig _Cfg;
+        TcpClient tt;
         Modbus.Device.ModbusIpMaster Master;
         ConcurrentDictionary<int, bool> IN = new ConcurrentDictionary<int, bool>();
         ConcurrentDictionary<int, bool> OUT = new ConcurrentDictionary<int, bool>();
@@ -25,16 +26,36 @@ namespace DIOControl.Controller
             _Cfg = Config;
             _Report = TriggerReport;
 
-            switch (Config.ConnectionType)
+            //Connect();
+            
+        }
+
+        public void Close()
+        {
+            tt.Close();
+            Master.Dispose();
+        }
+
+        public void Connect()
+        {
+            switch (_Cfg.ConnectionType)
             {
                 case "Socket":
-                    TcpClient tt = new TcpClient(Config.IPAdress, Config.Port);
+                    try
+                    {
+                        tt = new TcpClient(_Cfg.IPAdress, _Cfg.Port);
 
-                    Master = Modbus.Device.ModbusIpMaster.CreateIp(tt);
+                        Master = Modbus.Device.ModbusIpMaster.CreateIp(tt);
+                    }
+                    catch (Exception e)
+                    {
+                        _Report.On_Error_Occurred(_Cfg.DeviceName, "Disconnect");
+                        return;
+                    }
                     break;
             }
-            Master.Transport.Retries = Config.Retries;
-            Master.Transport.ReadTimeout = Config.ReadTimeout;
+            Master.Transport.Retries = _Cfg.Retries;
+            Master.Transport.ReadTimeout = _Cfg.ReadTimeout;
 
             Thread ReceiveTd = new Thread(Polling);
             ReceiveTd.IsBackground = true;
@@ -45,9 +66,15 @@ namespace DIOControl.Controller
         {
             while (true)
             {
-
-                bool[] Response = Master.ReadInputs(_Cfg.slaveID, 0, Convert.ToUInt16(_Cfg.DigitalInputQuantity));
-
+                bool[] Response = new bool[0];
+                try
+                {
+                    Response = Master.ReadInputs(_Cfg.slaveID, 0, Convert.ToUInt16(_Cfg.DigitalInputQuantity));
+                }catch(Exception e)
+                {
+                    _Report.On_Error_Occurred(_Cfg.DeviceName,"Disconnect");
+                    break;
+                }
                 for (int i = 0; i < _Cfg.DigitalInputQuantity; i++)
                 {
                     if (IN.ContainsKey(i))

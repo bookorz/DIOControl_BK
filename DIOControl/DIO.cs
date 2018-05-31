@@ -22,6 +22,29 @@ namespace DIOControl
         public DIO(IDIOTriggerReport ReportTarget)
         {
             _Report = ReportTarget;
+            Thread InitTd = new Thread(Initial);
+            InitTd.IsBackground = true;
+            InitTd.Start();
+        }
+
+        public void Connect()
+        {
+            foreach(IController each in Ctrls.Values)
+            {
+                each.Connect();
+            }
+        }
+
+        public void Close()
+        {
+            foreach (IController each in Ctrls.Values)
+            {
+                each.Close();
+            }
+        }
+
+        private void Initial()
+        {
             ConfigTool<CtrlConfig> configTool = new ConfigTool<CtrlConfig>();
             foreach (CtrlConfig each in configTool.ReadFileByList("config/DIO/DigitalList.json"))
             {
