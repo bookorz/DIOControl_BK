@@ -34,6 +34,7 @@ namespace DIOControl.Controller
         {
             tt.Close();
             Master.Dispose();
+            _Report.On_Connection_Status_Report(_Cfg.DeviceName, "Disconnect");
         }
 
         public void Connect()
@@ -49,14 +50,17 @@ namespace DIOControl.Controller
                 case "Socket":
                     try
                     {
+                        _Report.On_Connection_Status_Report(_Cfg.DeviceName, "Connecting");
                         tt = new TcpClient(_Cfg.IPAdress, _Cfg.Port);
 
                         Master = Modbus.Device.ModbusIpMaster.CreateIp(tt);
+                        _Report.On_Connection_Status_Report(_Cfg.DeviceName, "Connected");
 
                     }
                     catch (Exception e)
                     {
-                        _Report.On_Error_Occurred(_Cfg.DeviceName, "Disconnect");
+                        _Report.On_Error_Occurred(_Cfg.DeviceName, e.StackTrace);
+                        _Report.On_Connection_Status_Report(_Cfg.DeviceName, "Connection_Error");
                         return;
                     }
                     break;

@@ -214,7 +214,12 @@ namespace DIOControl
 
         public void On_Error_Occurred(string DIOName, string ErrorMsg)
         {
+            _Report.On_Error_Occurred(DIOName, ErrorMsg);
+        }
 
+        public void On_Connection_Status_Report(string DIOName, string Status)
+        {
+            _Report.On_Connection_Status_Report(DIOName, Status);
         }
     }
 }
