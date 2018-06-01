@@ -38,6 +38,12 @@ namespace DIOControl.Controller
 
         public void Connect()
         {
+            Thread CTd = new Thread(ConnectServer);
+            CTd.IsBackground = true;
+            CTd.Start();
+        }
+
+        private void ConnectServer() {
             switch (_Cfg.ConnectionType)
             {
                 case "Socket":
@@ -46,6 +52,7 @@ namespace DIOControl.Controller
                         tt = new TcpClient(_Cfg.IPAdress, _Cfg.Port);
 
                         Master = Modbus.Device.ModbusIpMaster.CreateIp(tt);
+
                     }
                     catch (Exception e)
                     {
@@ -142,12 +149,12 @@ namespace DIOControl.Controller
             {
                 if (!IN.TryGetValue(key, out result))
                 {
-                    throw new Exception("Address " + Address + " get fail!");
+                    throw new Exception("DeviceName:" + _Cfg.DeviceName + " Address " + Address + " get fail!");
                 }
             }
             else
             {
-                throw new Exception("Address " + Address + " not exist!");
+                throw new Exception("DeviceName:" + _Cfg.DeviceName + " Address " + Address + " not exist!");
             }
             return result.ToString();
         }
@@ -160,12 +167,12 @@ namespace DIOControl.Controller
             {
                 if (!OUT.TryGetValue(key, out result))
                 {
-                    throw new Exception("Address " + Address + " get fail!");
+                    throw new Exception("DeviceName:" + _Cfg.DeviceName + " Address " + Address + " get fail!");
                 }
             }
             else
             {
-                throw new Exception("Address " + Address + " not exist!");
+                throw new Exception("DeviceName:" + _Cfg.DeviceName + " Address " + Address + " not exist!");
             }
             return result.ToString();
         }

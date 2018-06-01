@@ -29,7 +29,7 @@ namespace DIOControl
 
         public void Connect()
         {
-            foreach(IController each in Ctrls.Values)
+            foreach (IController each in Ctrls.Values)
             {
                 each.Connect();
             }
@@ -86,12 +86,12 @@ namespace DIOControl
                 var find = from Out in Controls.Values.ToList()
                            where Out.Status.Equals("Blink")
                            select Out;
-                foreach(ControlConfig each in find)
+                foreach (ControlConfig each in find)
                 {
                     IController ctrl;
                     if (Ctrls.TryGetValue(each.DeviceName, out ctrl))
                     {
-                        
+
                         ctrl.SetOut(each.Address, Current);
 
                     }
@@ -115,24 +115,31 @@ namespace DIOControl
         public bool SetIO(string Parameter, string Value)
         {
             bool result = false;
-            ControlConfig ctrlCfg;
-            if (Controls.TryGetValue(Parameter, out ctrlCfg))
+            try
             {
-                IController ctrl;
-                if (Ctrls.TryGetValue(ctrlCfg.DeviceName, out ctrl))
+                ControlConfig ctrlCfg;
+                if (Controls.TryGetValue(Parameter, out ctrlCfg))
                 {
-                    ctrlCfg.Status = Value;
-                    ctrl.SetOut(ctrlCfg.Address, Value);
+                    IController ctrl;
+                    if (Ctrls.TryGetValue(ctrlCfg.DeviceName, out ctrl))
+                    {
+                        ctrlCfg.Status = Value;
+                        ctrl.SetOut(ctrlCfg.Address, Value);
 
+                    }
+                    else
+                    {
+                        logger.Debug("SetIO:DeviceName is not exist.");
+                    }
                 }
                 else
                 {
-                    logger.Debug("SetIO:DeviceName is not exist.");
+                    logger.Debug("SetIO:Parameter is not exist.");
                 }
             }
-            else
+            catch (Exception e)
             {
-                logger.Debug("SetIO:Parameter is not exist.");
+                logger.Debug("SetIO:" + e.Message);
             }
             return result;
         }
@@ -140,28 +147,57 @@ namespace DIOControl
         public bool SetBlink(string Parameter, string Value)
         {
             bool result = false;
-            ControlConfig ctrlCfg;
-            if (Controls.TryGetValue(Parameter, out ctrlCfg))
+            try
             {
-                if (Value.ToUpper().Equals("TRUE"))
+                ControlConfig ctrlCfg;
+                if (Controls.TryGetValue(Parameter, out ctrlCfg))
                 {
-                    ctrlCfg.Status = "Blink";
+                    if (Value.ToUpper().Equals("TRUE"))
+                    {
+                        ctrlCfg.Status = "Blink";
+                    }
+
                 }
-                
+                else
+                {
+                    logger.Debug("SetIO:Parameter is not exist.");
+                }
             }
-            else
+            catch (Exception e)
             {
-                logger.Debug("SetIO:Parameter is not exist.");
+                logger.Debug("SetBlink:" + e.Message);
             }
             return result;
         }
 
         public string GetIO(string Type, string Parameter)
         {
+
             string result = "";
+            try
+            {
 
+                var find = from Out in Params.Values.ToList()
+                           where Out.Type.Equals(Type) && Out.Parameter.Equals(Parameter)
+                           select Out;
+                IController ctrl;
+                if (Ctrls.TryGetValue(find.First().DeviceName, out ctrl))
+                {
+                    if (Type.Equals("OUT"))
+                    {
+                        result = ctrl.GetOut(find.First().Address);
+                    }
+                    else
+                    {
+                        result = ctrl.GetIn(find.First().Address);
+                    }
 
-
+                }
+            }
+            catch (Exception e)
+            {
+                logger.Debug("GetIO:" + e.Message);
+            }
             return result;
         }
 
