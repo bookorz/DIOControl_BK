@@ -105,26 +105,26 @@ namespace DIOControl.Controller
                     }
                 }
 
-                Response = Master.ReadCoils(_Cfg.slaveID, 0, Convert.ToUInt16(_Cfg.DigitalInputQuantity));
+                //Response = Master.ReadCoils(_Cfg.slaveID, 0, Convert.ToUInt16(_Cfg.DigitalInputQuantity));
 
-                for (int i = 0; i < _Cfg.DigitalInputQuantity; i++)
-                {
-                    if (OUT.ContainsKey(i))
-                    {
-                        bool org;
-                        OUT.TryGetValue(i, out org);
-                        if (org != Response[i])
-                        {
-                            OUT.TryUpdate(i, Response[i], org);
-                            _Report.On_Data_Chnaged(_Cfg.DeviceName, "OUT", i.ToString(), Response[i].ToString());
-                        }
-                    }
-                    else
-                    {
-                        OUT.TryAdd(i, Response[i]);
-                        _Report.On_Data_Chnaged(_Cfg.DeviceName, "OUT", i.ToString(), Response[i].ToString());
-                    }
-                }
+                //for (int i = 0; i < _Cfg.DigitalInputQuantity; i++)
+                //{
+                //    if (OUT.ContainsKey(i))
+                //    {
+                //        bool org;
+                //        OUT.TryGetValue(i, out org);
+                //        if (org != Response[i])
+                //        {
+                //            OUT.TryUpdate(i, Response[i], org);
+                //            _Report.On_Data_Chnaged(_Cfg.DeviceName, "OUT", i.ToString(), Response[i].ToString());
+                //        }
+                //    }
+                //    else
+                //    {
+                //        OUT.TryAdd(i, Response[i]);
+                //        _Report.On_Data_Chnaged(_Cfg.DeviceName, "OUT", i.ToString(), Response[i].ToString());
+                //    }
+                //}
                 SpinWait.SpinUntil(() => false, _Cfg.Delay);
 
             }
@@ -166,18 +166,21 @@ namespace DIOControl.Controller
         public string GetOut(string Address)
         {
             bool result = false;
-            int key = Convert.ToInt32(Address);
-            if (OUT.ContainsKey(key))
-            {
-                if (!OUT.TryGetValue(key, out result))
-                {
-                    throw new Exception("DeviceName:" + _Cfg.DeviceName + " Address " + Address + " get fail!");
-                }
-            }
-            else
-            {
-                throw new Exception("DeviceName:" + _Cfg.DeviceName + " Address " + Address + " not exist!");
-            }
+            //int key = Convert.ToInt32(Address);
+            //if (OUT.ContainsKey(key))
+            //{
+            //    if (!OUT.TryGetValue(key, out result))
+            //    {
+            //        throw new Exception("DeviceName:" + _Cfg.DeviceName + " Address " + Address + " get fail!");
+            //    }
+            //}
+            //else
+            //{
+            //    throw new Exception("DeviceName:" + _Cfg.DeviceName + " Address " + Address + " not exist!");
+            //}
+            result = Master.ReadCoils(_Cfg.slaveID, Convert.ToUInt16(Address), 1)[0];
+
+
             return result.ToString();
         }
 

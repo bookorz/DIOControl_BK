@@ -93,7 +93,7 @@ namespace DIOControl
                     {
 
                         ctrl.SetOut(each.Address, Current);
-
+                        _Report.On_Data_Chnaged(each.Parameter, Current);
                     }
                     else
                     {
@@ -125,7 +125,7 @@ namespace DIOControl
                     {
                         ctrlCfg.Status = Value;
                         ctrl.SetOut(ctrlCfg.Address, Value);
-
+                        _Report.On_Data_Chnaged(Parameter, Value);
                     }
                     else
                     {
@@ -176,22 +176,29 @@ namespace DIOControl
             string result = "";
             try
             {
-
-                var find = from Out in Params.Values.ToList()
-                           where Out.Type.Equals(Type) && Out.Parameter.Equals(Parameter)
-                           select Out;
-                IController ctrl;
-                if (Ctrls.TryGetValue(find.First().DeviceName, out ctrl))
+                if (Type.Equals("OUT"))
                 {
-                    if (Type.Equals("OUT"))
+                    ControlConfig outCfg;
+                    if (Controls.TryGetValue(Parameter, out outCfg))
                     {
-                        result = ctrl.GetOut(find.First().Address);
+                        IController ctrl;
+                        if (Ctrls.TryGetValue(outCfg.DeviceName, out ctrl))
+                        {
+                            result = ctrl.GetOut(outCfg.Address);
+                        }
                     }
-                    else
+                }
+                else
+                {
+                    ParamConfig inCfg;
+                    if (Params.TryGetValue(Parameter, out inCfg))
                     {
-                        result = ctrl.GetIn(find.First().Address);
+                        IController ctrl;
+                        if (Ctrls.TryGetValue(inCfg.DeviceName, out ctrl))
+                        {
+                            result = ctrl.GetIn(inCfg.Address);
+                        }
                     }
-
                 }
             }
             catch (Exception e)
@@ -219,6 +226,20 @@ namespace DIOControl
 
         public void On_Connection_Status_Report(string DIOName, string Status)
         {
+            if (Status.Equals("Connected"))
+            {
+                var find = from cfg in Controls.Values.ToList()
+                           where cfg.DeviceName.Equals(DIOName)
+                           select cfg;
+
+                foreach (ControlConfig cfg in find)
+                {
+                    if (cfg.DeviceName.Equals(DIOName))
+                    {
+                        _Report.On_Data_Chnaged(cfg.Parameter, GetIO("OUT", cfg.Parameter));
+                    }
+                }
+            }
             _Report.On_Connection_Status_Report(DIOName, Status);
         }
     }
