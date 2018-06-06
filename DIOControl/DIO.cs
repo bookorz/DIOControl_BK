@@ -215,7 +215,12 @@ namespace DIOControl
             if (Params.ContainsKey(key))
             {
                 Params.TryGetValue(key, out param);
+                if (param.Reverse)
+                {
+                    Value = (!bool.Parse(Value)).ToString();
+                }
                 _Report.On_Data_Chnaged(param.Parameter, Value);
+
             }
         }
 
