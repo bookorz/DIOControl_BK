@@ -91,8 +91,14 @@ namespace DIOControl
                     IController ctrl;
                     if (Ctrls.TryGetValue(each.DeviceName, out ctrl))
                     {
-
-                        ctrl.SetOut(each.Address, Current);
+                        try
+                        {
+                            ctrl.SetOut(each.Address, Current);
+                        }
+                        catch (Exception e)
+                        {
+                            logger.Error(e.StackTrace);
+                        }
                         _Report.On_Data_Chnaged(each.Parameter, Current);
                     }
                     else
