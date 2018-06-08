@@ -118,9 +118,9 @@ namespace DIOControl
             }
         }
 
-        public bool SetIO(string Parameter, string Value)
+        public void SetIO(string Parameter, string Value)
         {
-            bool result = false;
+
             try
             {
                 ControlConfig ctrlCfg;
@@ -147,7 +147,44 @@ namespace DIOControl
             {
                 logger.Debug("SetIO:" + e.Message);
             }
-            return result;
+
+        }
+
+        public void SetIO(Dictionary<string, string> Params)
+        {
+            Dictionary<string, IController> DIOList = new Dictionary<string, IController>();
+            foreach(string key in Params.Keys)
+            {
+                string Value = "";
+                Params.TryGetValue(key,out Value);
+                ControlConfig ctrlCfg;
+                if (Controls.TryGetValue(key, out ctrlCfg))
+                {
+                    IController ctrl;
+                    if (Ctrls.TryGetValue(ctrlCfg.DeviceName, out ctrl))
+                    {
+                        ctrlCfg.Status = Value;
+                        ctrl.SetOutWithoutUpdate(ctrlCfg.Address, Value);
+                        _Report.On_Data_Chnaged(key, Value);
+                        if (!DIOList.ContainsKey(ctrlCfg.DeviceName))
+                        {
+                            DIOList.Add(ctrlCfg.DeviceName, ctrl);
+                        }
+                    }
+                    else
+                    {
+                        logger.Debug("SetIO:DeviceName is not exist.");
+                    }
+                }
+                else
+                {
+                    logger.Debug("SetIO:Parameter is not exist.");
+                }
+            }
+            foreach(IController eachDIO in DIOList.Values)
+            {
+                eachDIO.UpdateOut();
+            }
         }
 
         public bool SetBlink(string Parameter, string Value)

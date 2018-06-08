@@ -115,7 +115,8 @@ namespace DIOControl.Controller
         public void SetOut(string Address, string Value)
         {
 
-            ushort adr = Convert.ToUInt16(Address); try
+            ushort adr = Convert.ToUInt16(Address);
+            try
             {
                 Master.WriteSingleCoil(_Cfg.slaveID, adr, Convert.ToBoolean(Value));
             }
@@ -132,6 +133,37 @@ namespace DIOControl.Controller
                 _Report.On_Data_Chnaged(_Cfg.DeviceName, "OUT", adr.ToString(), Response[0].ToString());
             }
 
+        }
+
+        public void SetOutWithoutUpdate(string Address, string Value)
+        {
+            ushort adr = Convert.ToUInt16(Address);
+            
+            bool org;
+            OUT.TryGetValue(adr, out org);
+            if (org != bool.Parse(Value))
+            {
+                OUT.TryUpdate(adr, bool.Parse(Value), org);
+                _Report.On_Data_Chnaged(_Cfg.DeviceName, "OUT", adr.ToString(), bool.Parse(Value).ToString());
+            }
+        }
+
+        public void UpdateOut()
+        {
+            bool[] data = new bool[_Cfg.DigitalInputQuantity];
+            for(int i = 0;i< _Cfg.DigitalInputQuantity;i++)
+            {
+                bool val;
+                if(OUT.TryGetValue(i,out val))
+                {
+                    data[i] = val;
+                }
+                else
+                {
+                    data[i] = false;
+                }
+            }
+            Master.WriteMultipleCoils(0, data);
         }
 
         public string GetIn(string Address)
@@ -155,7 +187,7 @@ namespace DIOControl.Controller
         public string GetOut(string Address)
         {
             bool result = false;
-         
+
             result = Master.ReadCoils(_Cfg.slaveID, Convert.ToUInt16(Address), 1)[0];
 
 
