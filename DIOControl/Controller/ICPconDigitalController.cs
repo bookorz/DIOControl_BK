@@ -126,13 +126,19 @@ namespace DIOControl.Controller
             }
             bool[] Response = Master.ReadCoils(_Cfg.slaveID, adr, 1);
             bool org;
-            OUT.TryGetValue(adr, out org);
-            if (org != Response[0])
+            if (OUT.TryGetValue(adr, out org))
             {
-                OUT.TryUpdate(adr, Response[0], org);
+                if (org != Response[0])
+                {
+                    OUT.TryUpdate(adr, Response[0], org);
+                    _Report.On_Data_Chnaged(_Cfg.DeviceName, "OUT", adr.ToString(), Response[0].ToString());
+                }
+            }
+            else
+            {
+                OUT.TryAdd(adr, Response[0]);
                 _Report.On_Data_Chnaged(_Cfg.DeviceName, "OUT", adr.ToString(), Response[0].ToString());
             }
-
         }
 
         public void SetOutWithoutUpdate(string Address, string Value)
@@ -140,10 +146,17 @@ namespace DIOControl.Controller
             ushort adr = Convert.ToUInt16(Address);
             
             bool org;
-            OUT.TryGetValue(adr, out org);
-            if (org != bool.Parse(Value))
+            if (OUT.TryGetValue(adr, out org))
             {
-                OUT.TryUpdate(adr, bool.Parse(Value), org);
+                if (org != bool.Parse(Value))
+                {
+                    OUT.TryUpdate(adr, bool.Parse(Value), org);
+                    _Report.On_Data_Chnaged(_Cfg.DeviceName, "OUT", adr.ToString(), bool.Parse(Value).ToString());
+                }
+            }
+            else
+            {
+                OUT.TryAdd(adr, bool.Parse(Value));
                 _Report.On_Data_Chnaged(_Cfg.DeviceName, "OUT", adr.ToString(), bool.Parse(Value).ToString());
             }
         }
@@ -163,7 +176,7 @@ namespace DIOControl.Controller
                     data[i] = false;
                 }
             }
-            Master.WriteMultipleCoils(0, data);
+            Master.WriteMultipleCoils(_Cfg.slaveID, 0, data);
         }
 
         public string GetIn(string Address)
