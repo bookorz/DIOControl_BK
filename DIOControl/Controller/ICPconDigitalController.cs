@@ -81,7 +81,10 @@ namespace DIOControl.Controller
                 bool[] Response = new bool[0];
                 try
                 {
-                    Response = Master.ReadInputs(_Cfg.slaveID, 0, Convert.ToUInt16(_Cfg.DigitalInputQuantity));
+                    lock (Master)
+                    {
+                        Response = Master.ReadInputs(_Cfg.slaveID, 0, Convert.ToUInt16(_Cfg.DigitalInputQuantity));
+                    }
                 }
                 catch (Exception e)
                 {
@@ -114,17 +117,23 @@ namespace DIOControl.Controller
 
         public void SetOut(string Address, string Value)
         {
-
+            bool[] Response;
             ushort adr = Convert.ToUInt16(Address);
             try
             {
-                Master.WriteSingleCoil(_Cfg.slaveID, adr, Convert.ToBoolean(Value));
+                lock (Master)
+                {
+                    Master.WriteSingleCoil(_Cfg.slaveID, adr, Convert.ToBoolean(Value));
+                }
             }
             catch
             {
                 throw new Exception(this._Cfg.DeviceName + " connection error!");
             }
-            bool[] Response = Master.ReadCoils(_Cfg.slaveID, adr, 1);
+            lock (Master)
+            {
+                 Response = Master.ReadCoils(_Cfg.slaveID, adr, 1);
+            }
             bool org;
             if (OUT.TryGetValue(adr, out org))
             {
@@ -176,7 +185,10 @@ namespace DIOControl.Controller
                     data[i] = false;
                 }
             }
-            Master.WriteMultipleCoils(_Cfg.slaveID, 0, data);
+            lock (Master)
+            {
+                Master.WriteMultipleCoils(_Cfg.slaveID, 0, data);
+            }
         }
 
         public string GetIn(string Address)
@@ -200,9 +212,10 @@ namespace DIOControl.Controller
         public string GetOut(string Address)
         {
             bool result = false;
-
-            result = Master.ReadCoils(_Cfg.slaveID, Convert.ToUInt16(Address), 1)[0];
-
+            lock (Master)
+            {
+                result = Master.ReadCoils(_Cfg.slaveID, Convert.ToUInt16(Address), 1)[0];
+            }
 
             return result.ToString();
         }
