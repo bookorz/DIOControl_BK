@@ -18,3 +18,8 @@ D:\SyncSourceCode\DIOControl\DIOControl\obj\Debug\DIOControl.dll
 D:\SyncSourceCode\DIOControl\DIOControl\obj\Debug\DIOControl.pdb
 D:\SyncSourceCode\DIOControl\DIOControl\obj\Debug\DIOControl.csprojAssemblyReference.cache
 C:\Users\ethan_huang\source\repos\DIOControl\DIOControl\obj\Debug\DIOControl.csprojAssemblyReference.cache
+C:\Users\ethan_huang\source\repos\DIOControl\DIOControl\bin\Debug\SANWA.dll
+C:\Users\ethan_huang\source\repos\DIOControl\DIOControl\bin\Debug\MySql.Data.dll
+C:\Users\ethan_huang\source\repos\DIOControl\DIOControl\bin\Debug\Dapper.dll
+C:\Users\ethan_huang\source\repos\DIOControl\DIOControl\bin\Debug\SANWA.pdb
+C:\Users\ethan_huang\source\repos\DIOControl\DIOControl\bin\Debug\Dapper.xml

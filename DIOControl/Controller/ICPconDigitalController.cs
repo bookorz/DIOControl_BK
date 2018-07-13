@@ -60,7 +60,7 @@ namespace DIOControl.Controller
                     }
                     catch (Exception e)
                     {
-                        _Report.On_Error_Occurred(_Cfg.DeviceName, e.StackTrace);
+                        _Report.On_Connection_Error(_Cfg.DeviceName, e.StackTrace);
                         _Report.On_Connection_Status_Report(_Cfg.DeviceName, "Connection_Error");
                         return;
                     }
@@ -88,7 +88,7 @@ namespace DIOControl.Controller
                 }
                 catch (Exception e)
                 {
-                    _Report.On_Error_Occurred(_Cfg.DeviceName, "Disconnect");
+                    _Report.On_Connection_Error(_Cfg.DeviceName, "Disconnect");
                     break;
                 }
                 for (int i = 0; i < _Cfg.DigitalInputQuantity; i++)

@@ -12,6 +12,9 @@ namespace DIOControl.Config
         public string Type { get; set; }
         public string Address { get; set; }
         public string Parameter { get; set; }
-        public bool Reverse { get; set; }
+        public string Normal { get; set; }
+        public string Abnormal { get; set; }
+        public string Error_Code { get; set; }
+        public DateTime LastErrorHappenTime { get; set; }
     }
 }

@@ -62,5 +62,11 @@
     <Compile Include="IDIOTriggerReport.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\SANWAFunction\SANWA\SANWA\SANWA.csproj">
+      <Project>{4eed2ed4-a72e-4f24-8d80-ef2f0b24fcf1}</Project>
+      <Name>SANWA</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

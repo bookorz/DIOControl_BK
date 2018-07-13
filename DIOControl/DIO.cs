@@ -1,9 +1,12 @@
 ﻿using DIOControl.Config;
 using DIOControl.Controller;
 using log4net;
+using Newtonsoft.Json;
+using SANWA.Utility;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -18,6 +21,7 @@ namespace DIOControl
         ConcurrentDictionary<string, IController> Ctrls = new ConcurrentDictionary<string, IController>();
         ConcurrentDictionary<string, ParamConfig> Params = new ConcurrentDictionary<string, ParamConfig>();
         ConcurrentDictionary<string, ControlConfig> Controls = new ConcurrentDictionary<string, ControlConfig>();
+        private static DBUtil dBUtil = new DBUtil();
 
         public DIO(IDIOTriggerReport ReportTarget)
         {
@@ -45,8 +49,29 @@ namespace DIOControl
 
         private void Initial()
         {
-            ConfigTool<CtrlConfig> configTool = new ConfigTool<CtrlConfig>();
-            foreach (CtrlConfig each in configTool.ReadFileByList("config/DIO/DigitalList.json"))
+
+            string Sql = @"select t.node_function_name as DeviceName,t.node_function_type as DeviceType,
+                            case when t.conn_type = 'Socket' then  t.conn_address else '' end as IPAdress ,
+                            case when t.conn_type = 'Socket' then  CONVERT(t.conn_prot,SIGNED) else 0 end as Port ,
+                            case when t.conn_type = 'Comport' then   CONVERT(t.conn_prot,SIGNED) else 0 end as BaudRate ,
+                            case when t.conn_type = 'Comport' then  t.conn_address else '' end as PortName ,
+                            t.com_parity_bit as ParityBit,
+                            ifnull(CONVERT(t.com_data_bits,SIGNED),0) as DataBits,
+                            t.com_stop_bit as StopBit,
+                            t.conn_type as ConnectionType,
+                            t.enable_flg as Enable,
+                            t.slaveID,
+                            t.DigitalInputQuantity,
+                            t.Delay,
+                            t.ReadTimeout
+                            from config_controller t
+                            where t.controller_type = 'DIO'";
+            DataTable dt = dBUtil.GetDataTable(Sql, null);
+            string str_json = JsonConvert.SerializeObject(dt, Formatting.Indented);
+
+            List<CtrlConfig> ctrlList = JsonConvert.DeserializeObject<List<CtrlConfig>>(str_json);
+
+            foreach (CtrlConfig each in ctrlList)
             {
                 IController eachCtrl = null;
                 switch (each.DeviceType)
@@ -61,14 +86,30 @@ namespace DIOControl
                     Ctrls.TryAdd(each.DeviceName, eachCtrl);
                 }
             }
-            ConfigTool<ParamConfig> configTool2 = new ConfigTool<ParamConfig>();
-            foreach (ParamConfig each in configTool2.ReadFileByList("config/DIO/ParameterSetting.json"))
+
+
+            Sql = @"select t.dioname DeviceName,t.`type` 'Type',t.address ,t.Parameter,t.abnormal,t.error_code  from config_dio t
+                    where t.`type` = 'IN'";
+             dt = dBUtil.GetDataTable(Sql, null);
+             str_json = JsonConvert.SerializeObject(dt, Formatting.Indented);
+
+            List<ParamConfig> ParamList = JsonConvert.DeserializeObject<List<ParamConfig>>(str_json);
+
+
+            foreach (ParamConfig each in ParamList)
             {
                 Params.TryAdd(each.DeviceName + each.Address + each.Type, each);
             }
-            ConfigTool<ControlConfig> configTool3 = new ConfigTool<ControlConfig>();
-            foreach (ControlConfig each in configTool3.ReadFileByList("config/DIO/ControlSetting.json"))
+
+            Sql = @"select t.dioname DeviceName,t.`type` 'Type',t.address ,t.Parameter,t.abnormal,t.error_code  from config_dio t
+                    where t.`type` = 'OUT'";
+            dt = dBUtil.GetDataTable(Sql, null);
+            str_json = JsonConvert.SerializeObject(dt, Formatting.Indented);
+
+            List<ControlConfig> CList = JsonConvert.DeserializeObject<List<ControlConfig>>(str_json);
+            foreach (ControlConfig each in CList)
             {
+                each.Status = "OFF";
                 Controls.TryAdd(each.Parameter, each);
             }
 
@@ -258,18 +299,32 @@ namespace DIOControl
             if (Params.ContainsKey(key))
             {
                 Params.TryGetValue(key, out param);
-                if (param.Reverse)
+                if (Value.ToUpper().Equals(param.Abnormal))
                 {
-                    Value = (!bool.Parse(Value)).ToString();
+                    Value = "False";
+                    if (param.LastErrorHappenTime == null)
+                    {
+                        param.LastErrorHappenTime = DateTime.Now;
+                    }
+                    else
+                    {
+                        TimeSpan t = DateTime.Now - param.LastErrorHappenTime;
+                        if (t.TotalSeconds > 5)
+                        {
+                            param.LastErrorHappenTime = DateTime.Now;
+                            _Report.On_Alarm_Happen(param.Parameter, param.Error_Code);
+                        }
+
+                    }
                 }
                 _Report.On_Data_Chnaged(param.Parameter, Value);
 
             }
         }
 
-        public void On_Error_Occurred(string DIOName, string ErrorMsg)
+        public void On_Connection_Error(string DIOName, string ErrorMsg)
         {
-            _Report.On_Error_Occurred(DIOName, ErrorMsg);
+            _Report.On_Connection_Error(DIOName, ErrorMsg);
         }
 
         public void On_Connection_Status_Report(string DIOName, string Status)
