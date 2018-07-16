@@ -90,8 +90,8 @@ namespace DIOControl
 
             Sql = @"select t.dioname DeviceName,t.`type` 'Type',t.address ,t.Parameter,t.abnormal,t.error_code  from config_dio t
                     where t.`type` = 'IN'";
-             dt = dBUtil.GetDataTable(Sql, null);
-             str_json = JsonConvert.SerializeObject(dt, Formatting.Indented);
+            dt = dBUtil.GetDataTable(Sql, null);
+            str_json = JsonConvert.SerializeObject(dt, Formatting.Indented);
 
             List<ParamConfig> ParamList = JsonConvert.DeserializeObject<List<ParamConfig>>(str_json);
 
@@ -155,6 +155,23 @@ namespace DIOControl
                 {
                     Current = "TRUE";
                 }
+
+                var inCfg = from parm in Params.Values.ToList()
+                            where parm.Parameter.Equals("IonizerAlarm")
+                            select parm;
+
+
+                ParamConfig Cfg = inCfg.First();
+
+                string key = Cfg.DeviceName + Cfg.Address + Cfg.Type;
+                if (Cfg.Abnormal.Equals(GetIO("IN", key).ToUpper()))
+                {
+                    _Report.On_Data_Chnaged(Cfg.Parameter, "BLINK");
+                }
+
+
+
+
                 SpinWait.SpinUntil(() => false, 700);
             }
         }
@@ -194,10 +211,10 @@ namespace DIOControl
         public void SetIO(Dictionary<string, string> Params)
         {
             Dictionary<string, IController> DIOList = new Dictionary<string, IController>();
-            foreach(string key in Params.Keys)
+            foreach (string key in Params.Keys)
             {
                 string Value = "";
-                Params.TryGetValue(key,out Value);
+                Params.TryGetValue(key, out Value);
                 ControlConfig ctrlCfg;
                 if (Controls.TryGetValue(key, out ctrlCfg))
                 {
@@ -222,7 +239,7 @@ namespace DIOControl
                     logger.Debug("SetIO:Parameter is not exist.");
                 }
             }
-            foreach(IController eachDIO in DIOList.Values)
+            foreach (IController eachDIO in DIOList.Values)
             {
                 eachDIO.UpdateOut();
             }
@@ -309,13 +326,17 @@ namespace DIOControl
                     else
                     {
                         TimeSpan t = DateTime.Now - param.LastErrorHappenTime;
-                        if (t.TotalSeconds > 5)
+                        if (t.TotalSeconds > 1)
                         {
                             param.LastErrorHappenTime = DateTime.Now;
                             _Report.On_Alarm_Happen(param.Parameter, param.Error_Code);
                         }
 
                     }
+                }
+                else
+                {
+                    Value = "TRUE";
                 }
                 _Report.On_Data_Chnaged(param.Parameter, Value);
 
