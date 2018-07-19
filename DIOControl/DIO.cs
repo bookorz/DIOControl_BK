@@ -159,7 +159,7 @@ namespace DIOControl
                 }
 
                 var inCfg = from parm in Params.Values.ToList()
-                            where parm.Parameter.Equals("IonizerAlarm")
+                            where parm.Parameter.Equals("IONIZERALARM")
                             select parm;
 
 
