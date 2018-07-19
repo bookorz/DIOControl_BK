@@ -18,9 +18,9 @@ namespace DIOControl
     {
         private static readonly ILog logger = LogManager.GetLogger(typeof(DIO));
         IDIOTriggerReport _Report;
-        ConcurrentDictionary<string, IController> Ctrls = new ConcurrentDictionary<string, IController>();
-        ConcurrentDictionary<string, ParamConfig> Params = new ConcurrentDictionary<string, ParamConfig>();
-        ConcurrentDictionary<string, ControlConfig> Controls = new ConcurrentDictionary<string, ControlConfig>();
+        ConcurrentDictionary<string, IController> Ctrls;
+        ConcurrentDictionary<string, ParamConfig> Params;
+        ConcurrentDictionary<string, ControlConfig> Controls;
         private static DBUtil dBUtil = new DBUtil();
 
         public DIO(IDIOTriggerReport ReportTarget)
@@ -47,9 +47,11 @@ namespace DIOControl
             }
         }
 
-        private void Initial()
+        public void Initial()
         {
-
+            Ctrls = new ConcurrentDictionary<string, IController>();
+            Params = new ConcurrentDictionary<string, ParamConfig>();
+            Controls = new ConcurrentDictionary<string, ControlConfig>();
             string Sql = @"select t.node_function_name as DeviceName,t.node_function_type as DeviceType,
                             case when t.conn_type = 'Socket' then  t.conn_address else '' end as IPAdress ,
                             case when t.conn_type = 'Socket' then  CONVERT(t.conn_prot,SIGNED) else 0 end as Port ,
