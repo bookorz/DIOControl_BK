@@ -90,7 +90,7 @@ namespace DIOControl
             }
 
 
-            Sql = @"select t.dioname DeviceName,t.`type` 'Type',t.address ,t.Parameter,t.abnormal,t.error_code  from config_dio t
+            Sql = @"select t.dioname DeviceName,t.`type` 'Type',t.address ,upper(t.Parameter) Parameter,t.abnormal,t.error_code  from config_dio t
                     where t.`type` = 'IN'";
             dt = dBUtil.GetDataTable(Sql, null);
             str_json = JsonConvert.SerializeObject(dt, Formatting.Indented);
@@ -103,7 +103,7 @@ namespace DIOControl
                 Params.TryAdd(each.DeviceName + each.Address + each.Type, each);
             }
 
-            Sql = @"select t.dioname DeviceName,t.`type` 'Type',t.address ,t.Parameter,t.abnormal,t.error_code  from config_dio t
+            Sql = @"select t.dioname DeviceName,t.`type` 'Type',t.address ,upper(t.Parameter) Parameter,t.abnormal,t.error_code  from config_dio t
                     where t.`type` = 'OUT'";
             dt = dBUtil.GetDataTable(Sql, null);
             str_json = JsonConvert.SerializeObject(dt, Formatting.Indented);
@@ -111,7 +111,7 @@ namespace DIOControl
             List<ControlConfig> CList = JsonConvert.DeserializeObject<List<ControlConfig>>(str_json);
             foreach (ControlConfig each in CList)
             {
-                each.Status = "OFF";
+                each.Status = "N/A";
                 Controls.TryAdd(each.Parameter, each);
             }
 
@@ -189,6 +189,7 @@ namespace DIOControl
                     IController ctrl;
                     if (Ctrls.TryGetValue(ctrlCfg.DeviceName, out ctrl))
                     {
+                        ChangeHisRecord.New(ctrlCfg.DeviceName, ctrlCfg.Type, ctrlCfg.Address, ctrlCfg.Parameter, Value, ctrlCfg.Status);
                         ctrlCfg.Status = Value;
                         ctrl.SetOut(ctrlCfg.Address, Value);
                         _Report.On_Data_Chnaged(Parameter, Value);
@@ -223,6 +224,10 @@ namespace DIOControl
                     IController ctrl;
                     if (Ctrls.TryGetValue(ctrlCfg.DeviceName, out ctrl))
                     {
+                        if (!Value.Equals(ctrlCfg.Status))
+                        {
+                            ChangeHisRecord.New(ctrlCfg.DeviceName, ctrlCfg.Type, ctrlCfg.Address, ctrlCfg.Parameter, Value, ctrlCfg.Status);
+                        }
                         ctrlCfg.Status = Value;
                         ctrl.SetOutWithoutUpdate(ctrlCfg.Address, Value);
                         _Report.On_Data_Chnaged(key, Value);
@@ -257,7 +262,18 @@ namespace DIOControl
                 {
                     if (Value.ToUpper().Equals("TRUE"))
                     {
+                        if (!ctrlCfg.Status.ToUpper().Equals("BLINK"))
+                        {
+                            ChangeHisRecord.New(ctrlCfg.DeviceName, ctrlCfg.Type, ctrlCfg.Address, ctrlCfg.Parameter, "Blink", ctrlCfg.Status);
+                        }
                         ctrlCfg.Status = "Blink";
+                    }
+                    else
+                    {
+                        if (!ctrlCfg.Status.ToUpper().Equals("FALSE"))
+                        {
+                            ChangeHisRecord.New(ctrlCfg.DeviceName, ctrlCfg.Type, ctrlCfg.Address, ctrlCfg.Parameter, "False", ctrlCfg.Status);
+                        }
                     }
 
                 }
@@ -311,16 +327,16 @@ namespace DIOControl
             return result;
         }
 
-        public void On_Data_Chnaged(string DIOName, string Type, string Address, string Value)
+        public void On_Data_Chnaged(string DIOName, string Type, string Address, string OldValue, string NewValue)
         {
             string key = DIOName + Address + Type;
             ParamConfig param;
             if (Params.ContainsKey(key))
             {
                 Params.TryGetValue(key, out param);
-                if (Value.ToUpper().Equals(param.Abnormal))
+                if (NewValue.ToUpper().Equals(param.Abnormal))
                 {
-                    Value = "False";
+                    NewValue = "False";
                     if (param.LastErrorHappenTime == null)
                     {
                         param.LastErrorHappenTime = DateTime.Now;
@@ -338,11 +354,16 @@ namespace DIOControl
                 }
                 else
                 {
-                    Value = "TRUE";
+                    NewValue = "TRUE";
                 }
-                _Report.On_Data_Chnaged(param.Parameter, Value);
-
+                _Report.On_Data_Chnaged(param.Parameter, NewValue);
+                if (Type.Equals("IN"))
+                {
+                    ChangeHisRecord.New(DIOName, Type, Address, param.Parameter, NewValue, OldValue);
+                }
+                
             }
+
         }
 
         public void On_Connection_Error(string DIOName, string ErrorMsg)

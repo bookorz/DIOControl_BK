@@ -100,13 +100,13 @@ namespace DIOControl.Controller
                         if (org != Response[i])
                         {
                             IN.TryUpdate(i, Response[i], org);
-                            _Report.On_Data_Chnaged(_Cfg.DeviceName, "IN", i.ToString(), Response[i].ToString());
+                            _Report.On_Data_Chnaged(_Cfg.DeviceName, "IN", i.ToString(), org.ToString(), Response[i].ToString());
                         }
                     }
                     else
                     {
                         IN.TryAdd(i, Response[i]);
-                        _Report.On_Data_Chnaged(_Cfg.DeviceName, "IN", i.ToString(), Response[i].ToString());
+                        _Report.On_Data_Chnaged(_Cfg.DeviceName, "IN", i.ToString(),"N/A", Response[i].ToString());
                     }
                 }
 
@@ -140,13 +140,13 @@ namespace DIOControl.Controller
                 if (org != Response[0])
                 {
                     OUT.TryUpdate(adr, Response[0], org);
-                    _Report.On_Data_Chnaged(_Cfg.DeviceName, "OUT", adr.ToString(), Response[0].ToString());
+                    _Report.On_Data_Chnaged(_Cfg.DeviceName, "OUT", adr.ToString(), org.ToString(), Response[0].ToString());
                 }
             }
             else
             {
                 OUT.TryAdd(adr, Response[0]);
-                _Report.On_Data_Chnaged(_Cfg.DeviceName, "OUT", adr.ToString(), Response[0].ToString());
+                _Report.On_Data_Chnaged(_Cfg.DeviceName, "OUT", adr.ToString(), "N/A", Response[0].ToString());
             }
         }
 
@@ -160,13 +160,13 @@ namespace DIOControl.Controller
                 if (org != bool.Parse(Value))
                 {
                     OUT.TryUpdate(adr, bool.Parse(Value), org);
-                    _Report.On_Data_Chnaged(_Cfg.DeviceName, "OUT", adr.ToString(), bool.Parse(Value).ToString());
+                    _Report.On_Data_Chnaged(_Cfg.DeviceName, "OUT", adr.ToString(), org.ToString(), bool.Parse(Value).ToString());
                 }
             }
             else
             {
                 OUT.TryAdd(adr, bool.Parse(Value));
-                _Report.On_Data_Chnaged(_Cfg.DeviceName, "OUT", adr.ToString(), bool.Parse(Value).ToString());
+                _Report.On_Data_Chnaged(_Cfg.DeviceName, "OUT", adr.ToString(), "N/A", bool.Parse(Value).ToString());
             }
         }
 

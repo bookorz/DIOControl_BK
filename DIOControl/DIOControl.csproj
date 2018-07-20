@@ -51,6 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChangeHisRecord.cs" />
     <Compile Include="Config\ConfigTool.cs" />
     <Compile Include="Config\ControlConfig.cs" />
     <Compile Include="Config\CtrlConfig.cs" />
