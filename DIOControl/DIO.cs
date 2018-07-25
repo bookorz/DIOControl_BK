@@ -52,7 +52,7 @@ namespace DIOControl
             Ctrls = new ConcurrentDictionary<string, IController>();
             Params = new ConcurrentDictionary<string, ParamConfig>();
             Controls = new ConcurrentDictionary<string, ControlConfig>();
-            string Sql = @"select t.node_function_name as DeviceName,t.node_function_type as DeviceType,
+            string Sql = @"SELECT t.device_name as DeviceName,t.device_type as DeviceType,
                             case when t.conn_type = 'Socket' then  t.conn_address else '' end as IPAdress ,
                             case when t.conn_type = 'Socket' then  CONVERT(t.conn_prot,SIGNED) else 0 end as Port ,
                             case when t.conn_type = 'Comport' then   CONVERT(t.conn_prot,SIGNED) else 0 end as BaudRate ,
@@ -66,8 +66,8 @@ namespace DIOControl
                             t.DigitalInputQuantity,
                             t.Delay,
                             t.ReadTimeout
-                            from config_controller t
-                            where t.controller_type = 'DIO'";
+                            FROM config_dio_setting t
+                            WHERE t.equipment_model_id = 'SORTER_2R2A8L'";
             DataTable dt = dBUtil.GetDataTable(Sql, null);
             string str_json = JsonConvert.SerializeObject(dt, Formatting.Indented);
 
@@ -90,7 +90,7 @@ namespace DIOControl
             }
 
 
-            Sql = @"select t.dioname DeviceName,t.`type` 'Type',t.address ,upper(t.Parameter) Parameter,t.abnormal,t.error_code  from config_dio t
+            Sql = @"select t.dioname DeviceName,t.`type` 'Type',t.address ,upper(t.Parameter) Parameter,t.abnormal,t.error_code  from config_dio_point t
                     where t.`type` = 'IN'";
             dt = dBUtil.GetDataTable(Sql, null);
             str_json = JsonConvert.SerializeObject(dt, Formatting.Indented);
@@ -103,7 +103,7 @@ namespace DIOControl
                 Params.TryAdd(each.DeviceName + each.Address + each.Type, each);
             }
 
-            Sql = @"select t.dioname DeviceName,t.`type` 'Type',t.address ,upper(t.Parameter) Parameter,t.abnormal,t.error_code  from config_dio t
+            Sql = @"select t.dioname DeviceName,t.`type` 'Type',t.address ,upper(t.Parameter) Parameter,t.abnormal,t.error_code  from config_dio_point t
                     where t.`type` = 'OUT'";
             dt = dBUtil.GetDataTable(Sql, null);
             str_json = JsonConvert.SerializeObject(dt, Formatting.Indented);
