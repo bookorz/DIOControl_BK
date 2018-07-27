@@ -10,6 +10,7 @@ namespace DIOControl.Config
     {
         public string DeviceName { get; set; }
         public string DeviceType { get; set; }
+        public string Vendor { get; set; }
         public string IPAdress { get; set; }
         public int Port { get; set; }
         public string ConnectionType { get; set; }

@@ -3,6 +3,7 @@ using DIOControl.Controller;
 using log4net;
 using Newtonsoft.Json;
 using SANWA.Utility;
+using SANWA.Utility.Config;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -52,7 +53,8 @@ namespace DIOControl
             Ctrls = new ConcurrentDictionary<string, IController>();
             Params = new ConcurrentDictionary<string, ParamConfig>();
             Controls = new ConcurrentDictionary<string, ControlConfig>();
-            string Sql = @"SELECT t.device_name as DeviceName,t.device_type as DeviceType,
+            Dictionary<string, object> keyValues = new Dictionary<string, object>();
+            string Sql = @"SELECT t.device_name as DeviceName,t.device_type as DeviceType,t.vendor as vendor,
                             case when t.conn_type = 'Socket' then  t.conn_address else '' end as IPAdress ,
                             case when t.conn_type = 'Socket' then  CONVERT(t.conn_prot,SIGNED) else 0 end as Port ,
                             case when t.conn_type = 'Comport' then   CONVERT(t.conn_prot,SIGNED) else 0 end as BaudRate ,
@@ -61,14 +63,12 @@ namespace DIOControl
                             ifnull(CONVERT(t.com_data_bits,SIGNED),0) as DataBits,
                             t.com_stop_bit as StopBit,
                             t.conn_type as ConnectionType,
-                            t.enable_flg as Enable,
-                            t.slaveID,
-                            t.DigitalInputQuantity,
-                            t.Delay,
-                            t.ReadTimeout
-                            FROM config_dio_setting t
-                            WHERE t.equipment_model_id = 'SORTER_2R2A8L'";
-            DataTable dt = dBUtil.GetDataTable(Sql, null);
+                            t.enable_flg as Enable
+                            FROM config_controller_setting t
+                            WHERE t.equipment_model_id = @equipment_model_id
+                            AND t.device_type = 'DIO'";
+            keyValues.Add("@equipment_model_id", SystemConfig.Get().SystemMode);
+            DataTable dt = dBUtil.GetDataTable(Sql, keyValues);
             string str_json = JsonConvert.SerializeObject(dt, Formatting.Indented);
 
             List<CtrlConfig> ctrlList = JsonConvert.DeserializeObject<List<CtrlConfig>>(str_json);
@@ -76,9 +76,13 @@ namespace DIOControl
             foreach (CtrlConfig each in ctrlList)
             {
                 IController eachCtrl = null;
-                switch (each.DeviceType)
+                switch (each.Vendor)
                 {
                     case "ICPCONDIGITAL":
+                        each.slaveID = 1;
+                        each.DigitalInputQuantity = 8;
+                        each.Delay = 100;
+                        each.ReadTimeout = 1000;
                         eachCtrl = new ICPconDigitalController(each, this);
 
                         break;
