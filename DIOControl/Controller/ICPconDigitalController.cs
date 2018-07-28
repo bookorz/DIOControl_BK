@@ -39,6 +39,7 @@ namespace DIOControl.Controller
 
         public void Connect()
         {
+            Close();
             Thread CTd = new Thread(ConnectServer);
             CTd.IsBackground = true;
             CTd.Start();
