@@ -32,8 +32,15 @@ namespace DIOControl.Controller
 
         public void Close()
         {
-            tt.Close();
-            Master.Dispose();
+            try
+            {
+                tt.Close();
+                Master.Dispose();
+            }
+            catch
+            {
+
+            }
             _Report.On_Connection_Status_Report(_Cfg.DeviceName, "Disconnect");
         }
 
