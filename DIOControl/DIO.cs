@@ -223,7 +223,7 @@ namespace DIOControl
                 string Value = "";
                 Params.TryGetValue(key, out Value);
                 ControlConfig ctrlCfg;
-                if (Controls.TryGetValue(key, out ctrlCfg))
+                if (Controls.TryGetValue(key.ToUpper(), out ctrlCfg))
                 {
                     IController ctrl;
                     if (Ctrls.TryGetValue(ctrlCfg.DeviceName, out ctrl))
